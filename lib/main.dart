@@ -79,8 +79,6 @@ class _MainMenuState extends State<MainMenu> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: Center(
@@ -250,7 +248,9 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
   Future fetchMovie() {
     developer.log('Fetching movie data from $serverUrl...');
     Future response = http.get(
-      Uri.http(serverUrl, '/movie'),
+      Uri.http(serverUrl, '/movie', {
+        'username': userName,
+      }),
     );
     // TODO: Handle network errors!
     return response.then((response) => _parseMovieData(response.body));
@@ -375,7 +375,8 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
             Expanded(child: Container()),
             Text('Jahr: $movieYear', style: Theme.of(context).textTheme.headline6),
             Text('Land: ${movieCountry.isNotEmpty ? movieCountry[0] : ''}', style: Theme.of(context).textTheme.headline6),
-            Text('Genres: ${movieGenres.isNotEmpty ? movieGenres.join(', ') : ''}', style: Theme.of(context).textTheme.headline6),
+            Text('Genres: ${movieGenres.isNotEmpty ? movieGenres.join(', ') : ''}',
+                textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline6),
             Text('Laufzeit: $movieRuntime', style: Theme.of(context).textTheme.headline6),
             RatingBarIndicator(
               rating: movieRating,
