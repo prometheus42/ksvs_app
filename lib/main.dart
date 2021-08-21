@@ -51,30 +51,6 @@ class MainMenu extends StatefulWidget {
 }
 
 class _MainMenuState extends State<MainMenu> {
-  void searchKodiInstances() async {
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-      // This is the type of service we're looking for :
-      String type = '_wonderful-service._tcp';
-
-      // Once defined, we can start the discovery :
-      BonsoirDiscovery discovery = BonsoirDiscovery(type: type);
-      await discovery.ready;
-      await discovery.start();
-
-      // If you want to listen to the discovery :
-      discovery.eventStream!.listen((event) {
-        if (event.type == BonsoirDiscoveryEventType.DISCOVERY_SERVICE_RESOLVED) {
-          print('Service found : ${event.service!.toJson()}');
-        } else if (event.type == BonsoirDiscoveryEventType.DISCOVERY_SERVICE_LOST) {
-          print('Service lost : ${event.service!.toJson()}');
-        }
-      });
-
-      // Then if you want to stop the discovery :
-      //await discovery.stop();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,7 +97,20 @@ class _MainMenuState extends State<MainMenu> {
                   ),
                   child: Text('Finde Kodi-Instanzen', style: Theme.of(context).textTheme.headline5),
                   onPressed: () {
-                    searchKodiInstances();
+                    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const FindKodiWidget()),
+                      );
+                    } else {
+                      final scaffold = ScaffoldMessenger.of(context);
+                      scaffold.showSnackBar(
+                        SnackBar(
+                          content: const Text('Suche nach Kodi-Instanzen nur unter Android verfügbar!'),
+                          action: SnackBarAction(label: 'ERROR', onPressed: scaffold.hideCurrentSnackBar),
+                        ),
+                      );
+                    }
                   },
                 ),
               ),
@@ -164,6 +153,103 @@ class _MainMenuState extends State<MainMenu> {
         ),
       ),
     );
+  }
+}
+
+class FindKodiWidget extends StatefulWidget {
+  const FindKodiWidget({Key? key}) : super(key: key);
+
+  @override
+  State<FindKodiWidget> createState() => _FindKodiWidgetState();
+}
+
+class _FindKodiWidgetState extends State<FindKodiWidget> {
+  List<BonsoirService> serviceList = [];
+
+  _FindKodiWidgetState() {
+    searchKodiInstances();
+  }
+
+  void searchKodiInstances() async {
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      // set the type of service we're looking for
+      String type = '_http._tcp'; //'_smb._tcp'; '._http._tcp.local.';
+
+      // start the discovery
+      BonsoirDiscovery discovery = BonsoirDiscovery(type: type);
+      await discovery.ready;
+      await discovery.start();
+
+      // listen to the discovery
+      discovery.eventStream!.listen((event) {
+        if (event.type == BonsoirDiscoveryEventType.DISCOVERY_SERVICE_RESOLVED) {
+          developer.log('Service found : ${event.service!.toJson()}');
+          setState(() {
+            serviceList.add(event.service!);
+          });
+        } else if (event.type == BonsoirDiscoveryEventType.DISCOVERY_SERVICE_LOST) {
+          developer.log('Service lost : ${event.service!.toJson()}');
+        }
+      });
+
+      // stop the discovery
+      //await discovery.stop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Finde Kodi-Instanzen...'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Expanded(child: Container()),
+            Text(
+              'Kodi-Instanzen',
+              style: Theme.of(context).textTheme.headline3,
+            ),
+            Expanded(child: Container()),
+            SizedBox(
+              height: 400,
+              child: ListView.separated(
+                padding: const EdgeInsets.all(8),
+                itemCount: serviceList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return GestureDetector(
+                    child: Container(
+                      height: 75,
+                      color: Colors.amberAccent,
+                      child: Center(
+                          child: Text(
+                              '${serviceList[index].name} unter der Adresse ${serviceList[index].toJson()['service.ip']}:${serviceList[index].port}',
+                              style: Theme.of(context).textTheme.headline6)),
+                    ),
+                    onTap: () => handleTap(serviceList[index]),
+                  );
+                },
+                separatorBuilder: (BuildContext context, int index) => const Divider(),
+              ),
+            ),
+            Expanded(child: Container()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void handleTap(BonsoirService service) {
+    String address = '${service.toJson()['service.ip']}:${service.port + 1}';
+    var scaffold = ScaffoldMessenger.of(context);
+    scaffold.showSnackBar(SnackBar(
+      content: Text('Setze die Adresse $address in den Einstellungen!'),
+      action: SnackBarAction(label: 'INFO', onPressed: scaffold.hideCurrentSnackBar),
+    ));
+    Future f = SharedPreferences.getInstance();
+    f.then((prefs) => {prefs.setString('serverUrl', address)});
   }
 }
 
