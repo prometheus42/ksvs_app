@@ -10,6 +10,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simple_gesture_detector/simple_gesture_detector.dart';
 import 'package:translator/translator.dart';
 
 void main() {
@@ -436,17 +437,20 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
       appBar: AppBar(
         title: const Text('Bewerte Filme'),
       ),
-      body: GestureDetector(
-        // Source: https://stackoverflow.com/a/64296804
-        onHorizontalDragEnd: (DragEndDetails details) {
-          if (details.primaryVelocity! > 0) {
-            // user swiped left
-            uploadVote(Voting.down);
-          } else if (details.primaryVelocity! < 0) {
-            // user swiped right
-            uploadVote(Voting.up);
-          }
+      body: SimpleGestureDetector(
+        onVerticalSwipe: (direction) {
+          print('swiping vertical');
         },
+        onHorizontalSwipe: (direction) {
+          print('swiping horizontal');
+        },
+        onLongPress: () {},
+        onTap: () {},
+        swipeConfig: const SimpleSwipeConfig(
+          verticalThreshold: 30.0,
+          horizontalThreshold: 30.0,
+          swipeDetectionBehavior: SwipeDetectionBehavior.continuousDistinct,
+        ),
         child: DecoratedBox(
           decoration: movieFanartUrl.isNotEmpty
               ? BoxDecoration(

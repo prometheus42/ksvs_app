@@ -37,6 +37,7 @@ dependencies:
   flutter_rating_bar: ^4.0.0
   bonsoir: ^1.0.0+1
   translator: ^0.1.7
+  simple_gesture_detector: ^0.2.0
 
 dev_dependencies:
   flutter_test:

@@ -19,3 +19,4 @@ command line:
 * https://pub.dev/packages/flutter_rating_bar
 * https://pub.dev/packages/translator
 * https://pub.dev/packages/bonsoir
+* https://pub.dev/packages/simple_gesture_detector
