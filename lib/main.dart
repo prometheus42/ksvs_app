@@ -34,8 +34,8 @@ class KsvsApp extends StatelessWidget {
     return MaterialApp(
       title: 'Kodi Simple Voting System',
       theme: ThemeData(
-          //primarySwatch: Colors.blue,
-          ),
+        primarySwatch: Colors.blue,
+      ),
       home: const MainMenu(title: 'Kodi Simple Voting System'),
     );
   }
@@ -64,9 +64,9 @@ class _MainMenuState extends State<MainMenu> {
             //const Image(image: AssetImage('assets/logo.png')),
             Text(
               'Kodi Simple Voting System',
-              style: Theme.of(context).textTheme.headline2,
+              style: Theme.of(context).textTheme.headline4,
             ),
-            const SizedBox(height: 50),
+            const SizedBox(height: 35),
             ConstrainedBox(
               constraints: const BoxConstraints.tightFor(width: 400),
               child: Padding(
@@ -268,7 +268,7 @@ class _SettingsWidgetState extends State<SettingsWidget> {
         TextInputSettingsTile(
           title: 'Host-Adresse für Kodi-Instanz',
           settingKey: 'serverUrl',
-          initialValue: '192.168.10.9:8081',
+          initialValue: '192.168.10.15:8081',
           keyboardType: TextInputType.url,
         ),
       ]),
@@ -325,7 +325,7 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
   Future loadConfiguration() {
     Future f = SharedPreferences.getInstance();
     return f.then((prefs) => {
-          serverUrl = prefs.getString('serverUrl') ?? 'http://127.0.0.1:5000',
+          serverUrl = prefs.getString('serverUrl') ?? '192.168.10.15:8081',
           userName = prefs.getString('userName') ?? 'John Doe',
           translatePlot = prefs.getBool('translatePlot') ?? false
         });
@@ -339,7 +339,18 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
       }),
     );
     // TODO: Handle network errors!
-    return response.then((response) => _parseMovieData(response.body));
+    ScaffoldMessengerState scaffold;
+    return response.then((response) => _parseMovieData(response.body),
+        onError: (error) => {
+              scaffold = ScaffoldMessenger.of(context),
+              scaffold.showSnackBar(
+                SnackBar(
+                  content: const Text('Konnte keine Film-Daten laden!'),
+                  action: SnackBarAction(label: 'ERROR', onPressed: scaffold.hideCurrentSnackBar),
+                ),
+              ),
+              developer.log('Error while fetching movie data: $error')
+            });
   }
 
   void _parseMovieData(responseBody) async {
@@ -425,88 +436,103 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
       appBar: AppBar(
         title: const Text('Bewerte Filme'),
       ),
-      body: DecoratedBox(
-        decoration: movieFanartUrl.isNotEmpty
-            ? BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(movieFanartUrl),
-                  fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.3), BlendMode.dstATop),
-                ),
-              )
-            : const BoxDecoration(),
-        child: Padding(
-          padding: const EdgeInsets.all(30),
-          child: Column(children: [
-            Text(movieName,
-                style: Theme.of(context).textTheme.headline3!.apply(
-                  shadows: [
-                    const BoxShadow(
-                      color: Colors.black54,
-                      offset: Offset(4, 4),
-                      blurRadius: 4,
-                    ),
-                  ],
-                )),
-            Expanded(child: Container()),
-            moviePosterUrl == ''
-                ? const Text('')
-                : Image.network(
-                    moviePosterUrl,
-                    height: 400,
+      body: GestureDetector(
+        // Source: https://stackoverflow.com/a/64296804
+        onHorizontalDragEnd: (DragEndDetails details) {
+          if (details.primaryVelocity! > 0) {
+            // user swiped left
+            uploadVote(Voting.down);
+          } else if (details.primaryVelocity! < 0) {
+            // user swiped right
+            uploadVote(Voting.up);
+          }
+        },
+        child: DecoratedBox(
+          decoration: movieFanartUrl.isNotEmpty
+              ? BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(movieFanartUrl),
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.3), BlendMode.dstATop),
                   ),
-            Expanded(child: Container()),
-            Text(moviePlot.length > maxTextLength ? moviePlot.substring(0, maxTextLength) + '...' : moviePlot,
-                style: Theme.of(context).textTheme.headline5),
-            Expanded(child: Container()),
-            Text('Jahr: $movieYear', style: Theme.of(context).textTheme.headline6),
-            Text('Land: ${movieCountry.isNotEmpty ? movieCountry[0] : ''}', style: Theme.of(context).textTheme.headline6),
-            Text('Genres: ${movieGenres.isNotEmpty ? movieGenres.join(', ') : ''}',
-                textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline6),
-            Text('Laufzeit: $movieRuntime', style: Theme.of(context).textTheme.headline6),
-            RatingBarIndicator(
-              rating: movieRating,
-              itemBuilder: (context, index) => const Icon(
-                Icons.star,
-                color: Colors.amber,
-              ),
-              itemCount: 10,
-              itemSize: 30.0,
-              direction: Axis.horizontal,
-            ),
-            Expanded(child: Container()),
-            Row(children: [
+                )
+              : const BoxDecoration(),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(children: [
+              Text(movieName,
+                  style: Theme.of(context).textTheme.headline4!.apply(
+                    shadows: [
+                      const BoxShadow(
+                        color: Colors.black54,
+                        offset: Offset(4, 4),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  )),
               Expanded(child: Container()),
-              MaterialButton(
-                color: Colors.redAccent,
-                shape: const CircleBorder(),
-                onPressed: () => uploadVote(Voting.down),
-                child: const Padding(
-                  padding: EdgeInsets.all(25),
-                  child: Icon(Icons.thumb_down, size: 50.0),
-                ),
-              ),
-              MaterialButton(
-                color: Colors.black26,
-                shape: const CircleBorder(),
-                onPressed: () => uploadVote(Voting.neutral),
-                child: const Padding(
-                  padding: EdgeInsets.all(25),
-                  child: Icon(Icons.album_outlined, size: 50.0),
-                ),
-              ),
-              MaterialButton(
-                color: Colors.greenAccent,
-                shape: const CircleBorder(),
-                onPressed: () => uploadVote(Voting.up),
-                child: const Padding(
-                  padding: EdgeInsets.all(25),
-                  child: Icon(Icons.thumb_up, size: 50.0),
-                ),
-              ),
+              moviePosterUrl == ''
+                  ? const Text('')
+                  : Image.network(
+                      moviePosterUrl,
+                      height: MediaQuery.of(context).size.height * 0.3,
+                    ),
               Expanded(child: Container()),
+              Text(moviePlot.length > maxTextLength ? moviePlot.substring(0, maxTextLength) + '...' : moviePlot,
+                  style: Theme.of(context).textTheme.headline6),
+              Expanded(child: Container()),
+              movieYear != 0 ? Text('Jahr: $movieYear', style: Theme.of(context).textTheme.headline6) : const Text(''),
+              movieCountry.isNotEmpty ? Text('Land: ${movieCountry[0]}', style: Theme.of(context).textTheme.headline6) : const Text(''),
+              movieGenres.isNotEmpty
+                  ? Text('Genres: ${movieGenres.join(', ')}', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline6)
+                  : const Text(''),
+              movieRuntime.isNotEmpty ? Text('Laufzeit: $movieRuntime', style: Theme.of(context).textTheme.headline6) : const Text(''),
+              movieRuntime.isNotEmpty
+                  ? RatingBarIndicator(
+                      rating: movieRating,
+                      itemBuilder: (context, index) => const Icon(
+                        Icons.star,
+                        color: Colors.amber,
+                      ),
+                      itemCount: 10,
+                      itemSize: 25.0,
+                      direction: Axis.horizontal,
+                    )
+                  : Container(),
+              Expanded(child: Container()),
+              Row(children: [
+                Expanded(child: Container()),
+                MaterialButton(
+                  color: Colors.redAccent,
+                  shape: const CircleBorder(),
+                  onPressed: () => uploadVote(Voting.down),
+                  child: const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Icon(Icons.thumb_down, size: 40.0),
+                  ),
+                ),
+                MaterialButton(
+                  color: Colors.black26,
+                  shape: const CircleBorder(),
+                  onPressed: () => uploadVote(Voting.neutral),
+                  child: const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Icon(Icons.album_outlined, size: 40.0),
+                  ),
+                ),
+                MaterialButton(
+                  color: Colors.greenAccent,
+                  shape: const CircleBorder(),
+                  onPressed: () => uploadVote(Voting.up),
+                  child: const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Icon(Icons.thumb_up, size: 40.0),
+                  ),
+                ),
+                Expanded(child: Container()),
+              ]),
             ]),
-          ]),
+          ),
         ),
       ),
     );
