@@ -445,11 +445,13 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
         title: const Text('Bewerte Filme'),
       ),
       body: SimpleGestureDetector(
-        onVerticalSwipe: (direction) {
-          print('swiping vertical');
-        },
+        onVerticalSwipe: (direction) {},
         onHorizontalSwipe: (direction) {
-          print('swiping horizontal');
+          if (direction == SwipeDirection.right) {
+            uploadVote(Voting.up);
+          } else if (direction == SwipeDirection.left) {
+            uploadVote(Voting.down);
+          }
         },
         onLongPress: () {},
         onTap: () {},
