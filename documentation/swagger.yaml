@@ -1,0 +1,175 @@
+swagger: "2.0"
+info:
+  description: "Simple app to vote for movies from Kodi."
+  version: "0.1.0"
+  title: "Kodi Simple Voting System"
+  contact:
+    email: "christian@freenono.org"
+  license:
+    name: "MIT License"
+    url: "https://github.com/prometheus42/ksvs_app/blob/main/LICENSE"
+host: "192.168.10.1:5000"
+basePath: "/"
+tags:
+- name: "movie"
+  description: "Get movie information"
+- name: "vote"
+  description: "Vote for a movie"
+schemes:
+- "http"
+- "https"
+paths:
+  /movie:
+    get:
+      tags:
+      - "movie"
+      summary: "Get information for movie"
+      description: "Get information for the movie, the user should be voting on next."
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        type: "string"
+        name: "username"
+        description: "User who should vote on movie."
+        required: true
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Movie"
+  /vote:
+    post:
+      tags:
+      - "vote"
+      summary: "Sends vote to server"
+      description: "Sends vote from user to server. The vote can be up, down or neutral."
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/Vote"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            additionalProperties:
+              type: "integer"
+              format: "int32"
+definitions:
+  Vote:
+    type: "object"
+    required:
+    - "movieid"
+    - "vote"
+    - "username"
+    properties:
+      movieid:
+        type: "integer"
+        format: "int64"
+      vote:
+        type: "integer"
+        format: "int32"
+        description: ""
+        enum: [
+          0,
+          1,
+          -1
+          ]
+      username:
+        $ref: "#/definitions/Username"
+  Movie:
+    type: "object"
+    required:
+    - "movieid"
+    - "country"
+    - "art"
+    - "fanart"
+    - "genre"
+    - "label"
+    - "plot"
+    - "rating"
+    - "runtime"
+    - "title"
+    - "year"
+    properties:
+      movieid:
+        type: "integer"
+        format: "int64"
+        example: 1632
+      country:
+        type: "array"
+        items:
+          type: "string"
+        example: ["United States of America"]
+      director:
+        type: "array"
+        items:
+          type: "string"
+        example: ["Seth Gordon"]
+      writer:
+        type: "array"
+        items:
+          type: "string"
+        example: ["Damian Shannon", "Mark Swift"]
+      art:
+        type: "object"
+        items:
+          type: "string"
+      fanart:
+        type: "string"
+      file:
+        description: "Local filename on Kodi server."
+        type: "string"
+      genre:
+        type: "array"
+        items:
+          type: "string"
+        example: ["Action", "Comedy"]
+      label:
+        type: "string"
+        example: "Baywatch"
+      originaltitle:
+        type: "string"
+        example: "Baywatch"
+      plot:
+        type: "string"
+        example: "Devoted lifeguard Mitch Buchannon butts heads with a brash new recruit. Together, they uncover a local criminal plot that threatens the future of the Bay."
+      plotoutline:
+        type: "string"
+      rating:
+        type: "number"
+        example: 6.099999904632568
+      runtime:
+        type: "integer"
+        format: "int32"
+        example: 6960
+      sorttitle:
+        type: "string"
+      tagline:
+        type: "string"
+        example: "Don't worry, summer is coming"
+      thumbnail:
+        type: "string"
+        description: "URL for fetching thumbnail image from Kodi."
+      title:
+        type: "string"
+        example: "Baywatch"
+      year:
+        type: "integer"
+        format: "int32"
+        example: 2017
+    xml:
+      name: "Movie"
+  Username:
+    type: "string"
+    xml:
+      name: "Username"
+externalDocs:
+  description: "Github page"
+  url: "https://github.com/prometheus42/ksvs_app"

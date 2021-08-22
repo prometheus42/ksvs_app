@@ -1,0 +1,181 @@
+openapi: 3.0.1
+info:
+  title: Kodi Simple Voting System
+  description: Simple app to vote for movies from Kodi.
+  contact:
+    email: christian@freenono.org
+  license:
+    name: MIT License
+    url: https://github.com/prometheus42/ksvs_app/blob/main/LICENSE
+  version: 0.1.0
+externalDocs:
+  description: Github page
+  url: https://github.com/prometheus42/ksvs_app
+servers:
+- url: http://192.168.10.1:5000/
+- url: https://192.168.10.1:5000/
+tags:
+- name: movie
+  description: Get movie information
+- name: vote
+  description: Vote for a movie
+paths:
+  /movie:
+    get:
+      tags:
+      - movie
+      summary: Get information for movie
+      description: Get information for the movie, the user should be voting on next.
+      parameters:
+      - name: username
+        in: query
+        description: User who should vote on movie.
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Movie'
+  /vote:
+    post:
+      tags:
+      - vote
+      summary: Sends vote to server
+      description: Sends vote from user to server. The vote can be up, down or neutral.
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Vote'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    Vote:
+      required:
+      - movieid
+      - username
+      - vote
+      type: object
+      properties:
+        movieid:
+          type: integer
+          format: int64
+        vote:
+          type: integer
+          description: ""
+          format: int32
+          enum:
+          - 0
+          - 1
+          - -1
+        username:
+          $ref: '#/components/schemas/Username'
+    Movie:
+      required:
+      - art
+      - country
+      - fanart
+      - genre
+      - label
+      - movieid
+      - plot
+      - rating
+      - runtime
+      - title
+      - year
+      type: object
+      properties:
+        movieid:
+          type: integer
+          format: int64
+          example: 1632
+        country:
+          type: array
+          example:
+          - United States of America
+          items:
+            type: string
+        director:
+          type: array
+          example:
+          - Seth Gordon
+          items:
+            type: string
+        writer:
+          type: array
+          example:
+          - Damian Shannon
+          - Mark Swift
+          items:
+            type: string
+        art:
+          type: object
+          properties: {}
+        fanart:
+          type: string
+        file:
+          type: string
+          description: Local filename on Kodi server.
+        genre:
+          type: array
+          example:
+          - Action
+          - Comedy
+          items:
+            type: string
+        label:
+          type: string
+          example: Baywatch
+        originaltitle:
+          type: string
+          example: Baywatch
+        plot:
+          type: string
+          example: Devoted lifeguard Mitch Buchannon butts heads with a brash new
+            recruit. Together, they uncover a local criminal plot that threatens the
+            future of the Bay.
+        plotoutline:
+          type: string
+        rating:
+          type: number
+          example: 6.099999904632568
+        runtime:
+          type: integer
+          format: int32
+          example: 6960
+        sorttitle:
+          type: string
+        tagline:
+          type: string
+          example: Don't worry, summer is coming
+        thumbnail:
+          type: string
+          description: URL for fetching thumbnail image from Kodi.
+        title:
+          type: string
+          example: Baywatch
+        year:
+          type: integer
+          format: int32
+          example: 2017
+      xml:
+        name: Movie
+    Username:
+      type: string
+      xml:
+        name: Username
