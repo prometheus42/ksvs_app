@@ -307,8 +307,6 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
   String userName = '';
   bool translatePlot = false;
 
-  static const int maxTextLength = 150;
-
   int movieId = 0;
   String movieName = ''; // "label" or "title" or "originaltitle" or "sorttitle"
   List<String> movieCountry = [];
@@ -472,17 +470,19 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
               : const BoxDecoration(),
           child: Padding(
             padding: const EdgeInsets.all(15),
-            child: buildMovieInfo2(),
+            child: MediaQuery.of(context).size.aspectRatio < 1 ? buildMovieInfoPortrait() : buildMovieInfoLandscape(),
           ),
         ),
       ),
     );
   }
 
-  buildMovieInfo2() {
+  buildMovieInfoPortrait() {
+    final scaleFactor = MediaQuery.of(context).size.height / 650;
     return Column(
       children: [
         Text(movieName,
+            textScaleFactor: scaleFactor,
             style: Theme.of(context).textTheme.headline4!.apply(
               shadows: [
                 const BoxShadow(
@@ -502,51 +502,52 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
                   height: MediaQuery.of(context).size.height * 0.5,
                   width: MediaQuery.of(context).size.width * 0.9,
                 ),
-          Container(
-            child: ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
-                  padding: MaterialStateProperty.all(const EdgeInsets.all(10)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    movieYear != 0 ? Text('Jahr: $movieYear', style: Theme.of(context).textTheme.bodyText1) : const Text(''),
-                    movieRuntime.isNotEmpty
-                        ? Text('Laufzeit: $movieRuntime', style: Theme.of(context).textTheme.bodyText1)
-                        : const Text(''),
-                    movieCountry.isNotEmpty
-                        ? Text('Land: ${movieCountry[0]}', style: Theme.of(context).textTheme.bodyText1)
-                        : const Text(''),
-                    movieGenres.isNotEmpty
-                        ? Text('Genres: ${movieGenres.join(', ')}', textAlign: TextAlign.left, style: Theme.of(context).textTheme.bodyText1)
-                        : const Text(''),
-                    movieRating != 0.0
-                        ? RatingBarIndicator(
-                            rating: movieRating,
-                            itemBuilder: (context, index) => const Icon(
-                              Icons.star,
-                              color: Colors.amber,
-                            ),
-                            itemCount: 10,
-                            itemSize: 20.0,
-                            direction: Axis.horizontal,
-                          )
-                        : Container(),
-                  ],
-                ),
-                onPressed: () {}),
-          ),
+          ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
+                padding: MaterialStateProperty.all(const EdgeInsets.all(10)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  movieYear != 0
+                      ? Text('Jahr: $movieYear', textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1)
+                      : const Text(''),
+                  movieRuntime.isNotEmpty
+                      ? Text('Laufzeit: $movieRuntime', textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1)
+                      : const Text(''),
+                  movieCountry.isNotEmpty
+                      ? Text('Land: ${movieCountry[0]}', textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1)
+                      : const Text(''),
+                  movieGenres.isNotEmpty
+                      ? Text('Genres: ${movieGenres.join(', ')}',
+                          textAlign: TextAlign.left, textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1)
+                      : const Text(''),
+                  movieRating != 0.0
+                      ? RatingBarIndicator(
+                          rating: movieRating,
+                          itemBuilder: (context, index) => const Icon(
+                            Icons.star,
+                            color: Colors.amber,
+                          ),
+                          itemCount: 10,
+                          itemSize: 20.0 * scaleFactor,
+                          direction: Axis.horizontal,
+                        )
+                      : Container(),
+                ],
+              ),
+              onPressed: () {}),
         ]),
         Expanded(child: Container()),
         Text(
           moviePlot,
           style: Theme.of(context).textTheme.bodyText1,
+          textScaleFactor: scaleFactor,
           overflow: TextOverflow.ellipsis,
           maxLines: 4,
         ),
-
         Expanded(child: Container()),
         Row(children: [
           Expanded(child: Container()),
@@ -583,10 +584,12 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
     );
   }
 
-  buildMovieInfo() {
+  buildMovieInfoLandscape() {
+    final scaleFactor = MediaQuery.of(context).size.width / 850;
     return Column(
       children: [
         Text(movieName,
+            textScaleFactor: scaleFactor,
             style: Theme.of(context).textTheme.headline4!.apply(
               shadows: [
                 const BoxShadow(
@@ -605,44 +608,52 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
                     moviePosterUrl,
                     fit: BoxFit.contain,
                     height: MediaQuery.of(context).size.height * 0.65,
-                    width: MediaQuery.of(context).size.width * 0.40,
+                    width: MediaQuery.of(context).size.width * 0.50,
                   ),
             Container(
               padding: const EdgeInsets.all(10),
+              alignment: Alignment.topLeft,
               child: SizedBox(
                 height: MediaQuery.of(context).size.height * 0.65,
-                width: MediaQuery.of(context).size.width * 0.45,
+                width: MediaQuery.of(context).size.width * 0.4,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(child: Container()),
-                    Text(moviePlot.length > maxTextLength ? moviePlot.substring(0, maxTextLength) + '...' : moviePlot,
+                    Text(moviePlot, //overflow: TextOverflow.ellipsis, maxLines: 4,
+                        textScaleFactor: scaleFactor,
                         style: Theme.of(context).textTheme.bodyText1),
-                    Expanded(child: Container()),
-                    movieYear != 0 ? Text('Jahr: $movieYear', style: Theme.of(context).textTheme.bodyText1) : const Text(''),
-                    movieCountry.isNotEmpty
-                        ? Text('Land: ${movieCountry[0]}', style: Theme.of(context).textTheme.bodyText1)
-                        : const Text(''),
-                    movieGenres.isNotEmpty
-                        ? Text('Genres: ${movieGenres.join(', ')}', textAlign: TextAlign.left, style: Theme.of(context).textTheme.bodyText1)
-                        : const Text(''),
-                    movieRuntime.isNotEmpty
-                        ? Text('Laufzeit: $movieRuntime', style: Theme.of(context).textTheme.bodyText1)
-                        : const Text(''),
-                    movieRuntime.isNotEmpty
-                        ? RatingBarIndicator(
-                            rating: movieRating,
-                            itemBuilder: (context, index) => const Icon(
-                              Icons.star,
-                              color: Colors.amber,
-                            ),
-                            itemCount: 10,
-                            itemSize: 20.0,
-                            direction: Axis.horizontal,
-                          )
-                        : Container(),
-                    Expanded(child: Container()),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        movieYear != 0
+                            ? Text('Jahr: $movieYear', textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1)
+                            : const Text(''),
+                        movieCountry.isNotEmpty
+                            ? Text('Land: ${movieCountry[0]}', textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1)
+                            : const Text(''),
+                        movieGenres.isNotEmpty
+                            ? Text('Genres: ${movieGenres.join(', ')}',
+                                textScaleFactor: scaleFactor, textAlign: TextAlign.left, style: Theme.of(context).textTheme.bodyText1)
+                            : const Text(''),
+                        movieRuntime.isNotEmpty
+                            ? Text('Laufzeit: $movieRuntime', textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1)
+                            : const Text(''),
+                        movieRuntime.isNotEmpty
+                            ? RatingBarIndicator(
+                                rating: movieRating,
+                                itemBuilder: (context, index) => const Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                ),
+                                itemCount: 10,
+                                itemSize: 20.0 * scaleFactor,
+                                direction: Axis.horizontal,
+                              )
+                            : Container(),
+                      ],
+                    ),
                   ],
                 ),
               ),
