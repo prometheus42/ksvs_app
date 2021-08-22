@@ -307,7 +307,7 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
   String userName = '';
   bool translatePlot = false;
 
-  static const int maxTextLength = 200;
+  static const int maxTextLength = 150;
 
   int movieId = 0;
   String movieName = ''; // "label" or "title" or "originaltitle" or "sorttitle"
@@ -471,8 +471,121 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
                 )
               : const BoxDecoration(),
           child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(children: [
+            padding: const EdgeInsets.all(15),
+            child: buildMovieInfo2(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  buildMovieInfo2() {
+    return Column(
+      children: [
+        Text(movieName,
+            style: Theme.of(context).textTheme.headline4!.apply(
+              shadows: [
+                const BoxShadow(
+                  color: Colors.black54,
+                  offset: Offset(3, 3),
+                  blurRadius: 4,
+                ),
+              ],
+            )),
+        Expanded(child: Container()),
+        Stack(alignment: Alignment.bottomRight, children: [
+          moviePosterUrl == ''
+              ? const Text('')
+              : Image.network(
+                  moviePosterUrl,
+                  fit: BoxFit.contain,
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  width: MediaQuery.of(context).size.width * 0.9,
+                ),
+          Container(
+            child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
+                  padding: MaterialStateProperty.all(const EdgeInsets.all(10)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    movieYear != 0 ? Text('Jahr: $movieYear', style: Theme.of(context).textTheme.bodyText1) : const Text(''),
+                    movieRuntime.isNotEmpty
+                        ? Text('Laufzeit: $movieRuntime', style: Theme.of(context).textTheme.bodyText1)
+                        : const Text(''),
+                    movieCountry.isNotEmpty
+                        ? Text('Land: ${movieCountry[0]}', style: Theme.of(context).textTheme.bodyText1)
+                        : const Text(''),
+                    movieGenres.isNotEmpty
+                        ? Text('Genres: ${movieGenres.join(', ')}', textAlign: TextAlign.left, style: Theme.of(context).textTheme.bodyText1)
+                        : const Text(''),
+                    movieRating != 0.0
+                        ? RatingBarIndicator(
+                            rating: movieRating,
+                            itemBuilder: (context, index) => const Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                            ),
+                            itemCount: 10,
+                            itemSize: 20.0,
+                            direction: Axis.horizontal,
+                          )
+                        : Container(),
+                  ],
+                ),
+                onPressed: () {}),
+          ),
+        ]),
+        Expanded(child: Container()),
+        Text(
+          moviePlot,
+          style: Theme.of(context).textTheme.bodyText1,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 4,
+        ),
+
+        Expanded(child: Container()),
+        Row(children: [
+          Expanded(child: Container()),
+          MaterialButton(
+            color: Colors.redAccent,
+            shape: const CircleBorder(),
+            onPressed: () => uploadVote(Voting.down),
+            child: const Padding(
+              padding: EdgeInsets.all(20),
+              child: Icon(Icons.thumb_down, size: 30.0),
+            ),
+          ),
+          MaterialButton(
+            color: Colors.black26,
+            shape: const CircleBorder(),
+            onPressed: () => uploadVote(Voting.neutral),
+            child: const Padding(
+              padding: EdgeInsets.all(20),
+              child: Icon(Icons.album_outlined, size: 30.0),
+            ),
+          ),
+          MaterialButton(
+            color: Colors.greenAccent,
+            shape: const CircleBorder(),
+            onPressed: () => uploadVote(Voting.up),
+            child: const Padding(
+              padding: EdgeInsets.all(20),
+              child: Icon(Icons.thumb_up, size: 30.0),
+            ),
+          ),
+          Expanded(child: Container()),
+        ]),
+      ],
+    );
+  }
+
+  buildMovieInfo() {
+    return Column(
+      children: [
               Text(movieName,
                   style: Theme.of(context).textTheme.headline4!.apply(
                     shadows: [
@@ -484,22 +597,39 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
                     ],
                   )),
               Expanded(child: Container()),
+        Row(
+          children: [
               moviePosterUrl == ''
                   ? const Text('')
                   : Image.network(
                       moviePosterUrl,
-                      height: MediaQuery.of(context).size.height * 0.3,
+                    fit: BoxFit.contain,
+                    height: MediaQuery.of(context).size.height * 0.65,
+                    width: MediaQuery.of(context).size.width * 0.40,
                     ),
+            Container(
+              padding: const EdgeInsets.all(10),
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.65,
+                width: MediaQuery.of(context).size.width * 0.45,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
               Expanded(child: Container()),
               Text(moviePlot.length > maxTextLength ? moviePlot.substring(0, maxTextLength) + '...' : moviePlot,
-                  style: Theme.of(context).textTheme.headline6),
+                        style: Theme.of(context).textTheme.bodyText1),
               Expanded(child: Container()),
-              movieYear != 0 ? Text('Jahr: $movieYear', style: Theme.of(context).textTheme.headline6) : const Text(''),
-              movieCountry.isNotEmpty ? Text('Land: ${movieCountry[0]}', style: Theme.of(context).textTheme.headline6) : const Text(''),
+                    movieYear != 0 ? Text('Jahr: $movieYear', style: Theme.of(context).textTheme.bodyText1) : const Text(''),
+                    movieCountry.isNotEmpty
+                        ? Text('Land: ${movieCountry[0]}', style: Theme.of(context).textTheme.bodyText1)
+                        : const Text(''),
               movieGenres.isNotEmpty
-                  ? Text('Genres: ${movieGenres.join(', ')}', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline6)
+                        ? Text('Genres: ${movieGenres.join(', ')}', textAlign: TextAlign.left, style: Theme.of(context).textTheme.bodyText1)
                   : const Text(''),
-              movieRuntime.isNotEmpty ? Text('Laufzeit: $movieRuntime', style: Theme.of(context).textTheme.headline6) : const Text(''),
+                    movieRuntime.isNotEmpty
+                        ? Text('Laufzeit: $movieRuntime', style: Theme.of(context).textTheme.bodyText1)
+                        : const Text(''),
               movieRuntime.isNotEmpty
                   ? RatingBarIndicator(
                       rating: movieRating,
@@ -508,11 +638,18 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
                         color: Colors.amber,
                       ),
                       itemCount: 10,
-                      itemSize: 25.0,
+                            itemSize: 20.0,
                       direction: Axis.horizontal,
                     )
                   : Container(),
               Expanded(child: Container()),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        Expanded(child: Container()),
               Row(children: [
                 Expanded(child: Container()),
                 MaterialButton(
@@ -521,7 +658,7 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
                   onPressed: () => uploadVote(Voting.down),
                   child: const Padding(
                     padding: EdgeInsets.all(20),
-                    child: Icon(Icons.thumb_down, size: 40.0),
+              child: Icon(Icons.thumb_down, size: 30.0),
                   ),
                 ),
                 MaterialButton(
@@ -530,7 +667,7 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
                   onPressed: () => uploadVote(Voting.neutral),
                   child: const Padding(
                     padding: EdgeInsets.all(20),
-                    child: Icon(Icons.album_outlined, size: 40.0),
+              child: Icon(Icons.album_outlined, size: 30.0),
                   ),
                 ),
                 MaterialButton(
@@ -539,15 +676,12 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
                   onPressed: () => uploadVote(Voting.up),
                   child: const Padding(
                     padding: EdgeInsets.all(20),
-                    child: Icon(Icons.thumb_up, size: 40.0),
+              child: Icon(Icons.thumb_up, size: 30.0),
                   ),
                 ),
                 Expanded(child: Container()),
               ]),
-            ]),
-          ),
-        ),
-      ),
+      ],
     );
   }
 }
