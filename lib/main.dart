@@ -336,6 +336,11 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
 
   Future fetchMovie() {
     developer.log('Fetching movie data from $serverUrl...');
+    // reset internal data structures
+    movieGenres.clear();
+    movieCountry.clear();
+
+    // get information about next movie
     Future response = http.get(
       Uri.http(serverUrl, '/movie', {
         'username': userName,
