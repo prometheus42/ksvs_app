@@ -65,11 +65,12 @@ class _MainMenuState extends State<MainMenu> {
             //const Image(image: AssetImage('assets/logo.png')),
             Text(
               'Kodi Simple Voting System',
+              textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headline4,
             ),
-            const SizedBox(height: 35),
-            ConstrainedBox(
-              constraints: const BoxConstraints.tightFor(width: 400),
+            const SizedBox(height: 50),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.9,
               child: Padding(
                 padding: const EdgeInsets.only(top: 10.00, bottom: 10.00),
                 child: ElevatedButton(
@@ -87,8 +88,8 @@ class _MainMenuState extends State<MainMenu> {
                 ),
               ),
             ),
-            ConstrainedBox(
-              constraints: const BoxConstraints.tightFor(width: 400),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.9,
               child: Padding(
                 padding: const EdgeInsets.only(top: 10.00, bottom: 10.00),
                 child: ElevatedButton(
@@ -116,8 +117,8 @@ class _MainMenuState extends State<MainMenu> {
                 ),
               ),
             ),
-            ConstrainedBox(
-              constraints: const BoxConstraints.tightFor(width: 400),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.9,
               child: Padding(
                 padding: const EdgeInsets.only(top: 10.00, bottom: 10.00),
                 child: ElevatedButton(
@@ -135,8 +136,9 @@ class _MainMenuState extends State<MainMenu> {
                 ),
               ),
             ),
-            ConstrainedBox(
-              constraints: const BoxConstraints.tightFor(width: 400),
+
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.9,
               child: Padding(
                 padding: const EdgeInsets.only(top: 10.00, bottom: 10.00),
                 child: ElevatedButton(
