@@ -206,7 +206,7 @@ class _FindKodiWidgetState extends State<FindKodiWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Finde Kodi-Instanzen...'),
+        title: const Text('Kodi-Instanzen'),
       ),
       body: Center(
         child: Column(
@@ -452,7 +452,7 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bewerte Filme'),
+        title: const Text('Filme-Bewertung'),
       ),
       body: SimpleGestureDetector(
         onVerticalSwipe: (direction) {},
@@ -499,8 +499,10 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
                 animatedTexts: [
                   ColorizeAnimatedText(
                     movieName,
+                    textAlign: TextAlign.center,
                     textStyle: Theme.of(context).textTheme.headline4!.apply(
                       fontWeightDelta: 5,
+                      fontSizeDelta: 5 * scaleFactor,
                       shadows: [
                         const BoxShadow(
                           color: Colors.black54,
@@ -523,6 +525,7 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
               )
             : Text(movieName,
                 textScaleFactor: scaleFactor,
+                textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headline4!.apply(
                   shadows: [
                     const BoxShadow(
@@ -545,7 +548,7 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
           ElevatedButton(
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
-                padding: MaterialStateProperty.all(const EdgeInsets.all(10)),
+                padding: MaterialStateProperty.all(const EdgeInsets.symmetric(vertical: 15, horizontal: 7)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -574,8 +577,9 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
                           rating: movieRating,
                           itemBuilder: (context, index) => const Icon(
                             Icons.star,
-                            color: Colors.amber,
+                            color: Colors.yellow,
                           ),
+                          unratedColor: Colors.black,
                           itemCount: 10,
                           itemSize: 20.0 * scaleFactor,
                           direction: Axis.horizontal,
@@ -661,6 +665,7 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
                     movieName,
                     textStyle: Theme.of(context).textTheme.headline4!.apply(
                       fontWeightDelta: 5,
+                      fontSizeDelta: 5 * scaleFactor,
                       shadows: [
                         const BoxShadow(
                           color: Colors.black54,
@@ -717,7 +722,7 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
                         ? AnimatedTextKit(
                             animatedTexts: [
                               TypewriterAnimatedText(moviePlot,
-                                  textStyle: Theme.of(context).textTheme.bodyText1!.apply(fontSizeDelta: 2 * scaleFactor)),
+                                  textStyle: Theme.of(context).textTheme.bodyText1!.apply(fontSizeDelta: 5 * scaleFactor)),
                             ],
                             onTap: () {},
                           )
