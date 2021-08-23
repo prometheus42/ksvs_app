@@ -1,7 +1,7 @@
 #! /bin/bash
 
 PROGRAM="ksvs-app"
-VERSION="v0.1"
+VERSION="v0.2"
 
 echo "Building:" ${PROGRAM}
 
