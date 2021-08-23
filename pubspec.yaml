@@ -38,6 +38,7 @@ dependencies:
   bonsoir: ^1.0.0+1
   translator: ^0.1.7
   simple_gesture_detector: ^0.2.0
+  animated_text_kit: ^4.2.1
 
 dev_dependencies:
   flutter_test:

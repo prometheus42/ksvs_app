@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io' show Platform;
+import 'dart:ui';
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:bonsoir/bonsoir.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -288,6 +290,14 @@ class _SettingsWidgetState extends State<SettingsWidget> {
             leading: const Icon(Icons.language),
             settingKey: 'translatePlot'),
       ]),
+      SettingsGroup(title: 'Oberfläche', children: [
+        CheckboxSettingsTile(
+          title: 'Alles voller Animationen!',
+          settingKey: 'animateEverything',
+          leading: const Icon(Icons.animation),
+          defaultValue: true,
+        ),
+      ]),
     ]);
   }
 }
@@ -306,6 +316,7 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
   String serverUrl = '';
   String userName = '';
   bool translatePlot = false;
+  bool animateEverything = true;
 
   int movieId = 0;
   String movieName = ''; // "label" or "title" or "originaltitle" or "sorttitle"
@@ -328,7 +339,8 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
     return f.then((prefs) => {
           serverUrl = prefs.getString('serverUrl') ?? '192.168.10.15:8081',
           userName = prefs.getString('userName') ?? 'John Doe',
-          translatePlot = prefs.getBool('translatePlot') ?? false
+          translatePlot = prefs.getBool('translatePlot') ?? false,
+          animateEverything = prefs.getBool('animateEverything') ?? true
         });
   }
 
@@ -478,20 +490,48 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
   }
 
   buildMovieInfoPortrait() {
+    // TODO: Use package for handling different display sizes and orientations. (e.g. https://pub.dev/packages/sizer or https://pub.dev/packages/flutter_screenutil)
     final scaleFactor = MediaQuery.of(context).size.height / 650;
     return Column(
       children: [
-        Text(movieName,
-            textScaleFactor: scaleFactor,
-            style: Theme.of(context).textTheme.headline4!.apply(
-              shadows: [
-                const BoxShadow(
-                  color: Colors.black54,
-                  offset: Offset(3, 3),
-                  blurRadius: 4,
-                ),
-              ],
-            )),
+        animateEverything
+            ? AnimatedTextKit(
+                animatedTexts: [
+                  ColorizeAnimatedText(
+                    movieName,
+                    textStyle: Theme.of(context).textTheme.headline4!.apply(
+                      fontWeightDelta: 5,
+                      shadows: [
+                        const BoxShadow(
+                          color: Colors.black54,
+                          offset: Offset(3, 3),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    colors: [
+                      Colors.purple,
+                      Colors.blue,
+                      Colors.yellow,
+                      Colors.red,
+                    ],
+                  ),
+                ],
+                isRepeatingAnimation: true,
+                repeatForever: true,
+                onTap: () {},
+              )
+            : Text(movieName,
+                textScaleFactor: scaleFactor,
+                style: Theme.of(context).textTheme.headline4!.apply(
+                  shadows: [
+                    const BoxShadow(
+                      color: Colors.black54,
+                      offset: Offset(3, 3),
+                      blurRadius: 4,
+                    ),
+                  ],
+                )),
         Expanded(child: Container()),
         Stack(alignment: Alignment.bottomRight, children: [
           moviePosterUrl == ''
@@ -512,17 +552,22 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   movieYear != 0
-                      ? Text('Jahr: $movieYear', textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1)
+                      ? Text('Jahr: $movieYear',
+                          textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1!.apply(color: Colors.white))
                       : const Text(''),
                   movieRuntime.isNotEmpty
-                      ? Text('Laufzeit: $movieRuntime', textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1)
+                      ? Text('Laufzeit: $movieRuntime',
+                          textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1!.apply(color: Colors.white))
                       : const Text(''),
                   movieCountry.isNotEmpty
-                      ? Text('Land: ${movieCountry[0]}', textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1)
+                      ? Text('Land: ${movieCountry[0]}',
+                          textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1!.apply(color: Colors.white))
                       : const Text(''),
                   movieGenres.isNotEmpty
                       ? Text('Genres: ${movieGenres.join(', ')}',
-                          textAlign: TextAlign.left, textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1)
+                          textAlign: TextAlign.left,
+                          textScaleFactor: scaleFactor,
+                          style: Theme.of(context).textTheme.bodyText1!.apply(color: Colors.white))
                       : const Text(''),
                   movieRating != 0.0
                       ? RatingBarIndicator(
@@ -540,6 +585,27 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
               ),
               onPressed: () {}),
         ]),
+        Expanded(child: Container()),
+        animateEverything
+            ? SizedBox(
+                height: 30,
+                child: AnimatedTextKit(
+                  animatedTexts: [
+                    TypewriterAnimatedText(movieYear != 0 ? 'Jahr: $movieYear' : '',
+                        textStyle: Theme.of(context).textTheme.bodyText1!.apply(fontSizeDelta: 2 * scaleFactor)),
+                    TypewriterAnimatedText(movieRuntime.isNotEmpty ? 'Laufzeit: $movieRuntime' : '',
+                        textStyle: Theme.of(context).textTheme.bodyText1!.apply(fontSizeDelta: 2 * scaleFactor)),
+                    TypewriterAnimatedText(movieCountry.isNotEmpty ? 'Land: ${movieCountry[0]}' : '',
+                        textStyle: Theme.of(context).textTheme.bodyText1!.apply(fontSizeDelta: 2 * scaleFactor)),
+                    TypewriterAnimatedText(movieGenres.isNotEmpty ? 'Genres: ${movieGenres.join(', ')}' : '',
+                        textStyle: Theme.of(context).textTheme.bodyText1!.apply(fontSizeDelta: 2 * scaleFactor)),
+                  ],
+                  repeatForever: true,
+                  isRepeatingAnimation: true,
+                  onTap: () {},
+                ),
+              )
+            : Container(),
         Expanded(child: Container()),
         Text(
           moviePlot,
@@ -588,17 +654,44 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
     final scaleFactor = MediaQuery.of(context).size.width / 850;
     return Column(
       children: [
-        Text(movieName,
-            textScaleFactor: scaleFactor,
-            style: Theme.of(context).textTheme.headline4!.apply(
-              shadows: [
-                const BoxShadow(
-                  color: Colors.black54,
-                  offset: Offset(4, 4),
-                  blurRadius: 4,
-                ),
-              ],
-            )),
+        animateEverything
+            ? AnimatedTextKit(
+                animatedTexts: [
+                  ColorizeAnimatedText(
+                    movieName,
+                    textStyle: Theme.of(context).textTheme.headline4!.apply(
+                      fontWeightDelta: 5,
+                      shadows: [
+                        const BoxShadow(
+                          color: Colors.black54,
+                          offset: Offset(3, 3),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    colors: [
+                      Colors.purple,
+                      Colors.blue,
+                      Colors.yellow,
+                      Colors.red,
+                    ],
+                  ),
+                ],
+                isRepeatingAnimation: true,
+                repeatForever: true,
+                onTap: () {},
+              )
+            : Text(movieName,
+                textScaleFactor: scaleFactor,
+                style: Theme.of(context).textTheme.headline4!.apply(
+                  shadows: [
+                    const BoxShadow(
+                      color: Colors.black54,
+                      offset: Offset(4, 4),
+                      blurRadius: 4,
+                    ),
+                  ],
+                )),
         Expanded(child: Container()),
         Row(
           children: [
@@ -620,9 +713,15 @@ class _MovieScoreWidgetState extends State<MovieScoreWidget> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(moviePlot, //overflow: TextOverflow.ellipsis, maxLines: 4,
-                        textScaleFactor: scaleFactor,
-                        style: Theme.of(context).textTheme.bodyText1),
+                    animateEverything
+                        ? AnimatedTextKit(
+                            animatedTexts: [
+                              TypewriterAnimatedText(moviePlot,
+                                  textStyle: Theme.of(context).textTheme.bodyText1!.apply(fontSizeDelta: 2 * scaleFactor)),
+                            ],
+                            onTap: () {},
+                          )
+                        : Text(moviePlot, textScaleFactor: scaleFactor, style: Theme.of(context).textTheme.bodyText1),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
